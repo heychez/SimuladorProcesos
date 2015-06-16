@@ -35,6 +35,7 @@ public class Proceso {
     private int estado;
 
     private int tFaltante;
+    private int tBloqueado;
     private int quantumUtilizado;
     
     public boolean enMemoria = false;
@@ -84,6 +85,15 @@ public class Proceso {
         estado = ESTADO_EJECUCION;
         tFaltante -= quantum;
         quantumUtilizado = quantum;
+    }
+    
+    public void bloqueado(){
+        estado = ESTADO_BLOQUEADO;
+        tBloqueado = new Random().nextInt((MAX_T_BLOQUEADO - MIN_T_BLOQUEADO) + 1) + MIN_T_BLOQUEADO;
+    }
+    
+    public void desbloqueado(){
+        estado = ESTADO_LISTO;
     }
 
     public void interrumpir() {
@@ -136,6 +146,10 @@ public class Proceso {
 
     public int gettFaltante() {
         return tFaltante;
+    }
+    
+    public int gettBloqueado(){
+        return tBloqueado;
     }
 
     public int getQuantumUtilizado() {
