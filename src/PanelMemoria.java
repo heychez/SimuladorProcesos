@@ -25,12 +25,12 @@ public class PanelMemoria extends JPanel {
         super.paint(g);
 
         ArrayList<Proceso> procesosEnMemoria = Memoria.getInstance().getProcesosEnMemoria();
-        int x = 10, y = 10;
+        int x = 10, y = 10, m;
 
         for (int i = 0; i < procesosEnMemoria.size(); i++) {
             Proceso proceso = procesosEnMemoria.get(i);
 
-            int ancho = proceso.gettMemoria() / 2;
+            int ancho = proceso.getMemoria() / 2;
             //g.drawImage(img.getImage(), disNodo, 35, 170, 50, this);
             g.setColor(Color.gray);
             g.fillRect(x, y, ancho, 60);
@@ -40,7 +40,9 @@ public class PanelMemoria extends JPanel {
 
             g.setColor(Color.white);
             g.drawString(proceso.getNombre(), x + 10, y + 20);
-            g.drawString(String.valueOf(proceso.gettMemoria()) + " K", x + 10, y + 40);
+            
+            m = proceso.getMemoria()*100/Memoria.MAX_MEMORIA_K;
+            g.drawString(String.valueOf(m) + "%", x + 10, y + 40);
 
             this.repaint();
 
@@ -52,7 +54,9 @@ public class PanelMemoria extends JPanel {
         g.fillRect(x, y, memoriaDisponible / 2, 60);
         g.setColor(Color.black);
         g.drawString("DISP", x + 5, y + 20);
-        g.drawString(String.valueOf(memoriaDisponible) + " K", x + 5, y + 40);
+        
+        m = memoriaDisponible*100/Memoria.MAX_MEMORIA_K;
+        g.drawString(String.valueOf(m) + "%", x + 5, y + 40);
         this.repaint();
 
     }

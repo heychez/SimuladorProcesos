@@ -40,7 +40,7 @@ public class Admision extends Thread {
                     simulador.refrescarTablaProcesosNuevos();
 
                     simulador.getColaDeProcesos().add(proceso.copia());
-                    simulador.refrescarTablaColaProcesos();
+                    simulador.refrescarTablaColaProcesosListos();
                 }
             }
 

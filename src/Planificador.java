@@ -10,7 +10,7 @@
  */
 public class Planificador {
 
-    public static final int QUANTUM = 2;
+    public static final int QUANTUM = 5;//2;
 
     private static int nroDeProcesos = 0;
 

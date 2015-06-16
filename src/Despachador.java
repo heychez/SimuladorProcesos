@@ -25,7 +25,7 @@ public class Despachador extends Thread {
     @Override
     public void run() {
         try {
-            this.sleep(100);
+            this.sleep(1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(Admision.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -40,12 +40,13 @@ public class Despachador extends Thread {
                 System.out.println(proceso.getNombre() + ", " + proceso.getNombreEstado());
                 if (proceso.getEstado() == Proceso.ESTADO_LISTO) {
                     int q = Planificador.QUANTUM;
-                    if (proceso.gettEjecucionFaltante() < Planificador.QUANTUM) {
-                        q = proceso.gettEjecucionFaltante();
+                    if (proceso.gettFaltante() < Planificador.QUANTUM) {
+                        q = proceso.gettFaltante();
                     }
 
                     proceso.ejecutar(q);
-                    simulador.refrescarTablaColaProcesos();
+                    simulador.refrescarTablaProcesoEjecucion(proceso);
+                    simulador.refrescarTablaColaProcesosListos();
                     simulador.getPanelDiagramaGrantt().agregarProceso(proceso.copia());
                     System.out.println("ejecutando.. " + q);
                     try {
@@ -53,8 +54,9 @@ public class Despachador extends Thread {
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Admision.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    //simulador.refrescarTablaProcesoEjecucion(null);
 
-                    if (proceso.gettEjecucionFaltante() == 0) { // el proceso ha finalizado
+                    if (proceso.gettFaltante() == 0) { // el proceso ha finalizado
                         proceso.finalizar();
                         colaDeProcesos.remove(proceso);
                         procesosFinalizados.add(proceso);
@@ -68,7 +70,7 @@ public class Despachador extends Thread {
                         proceso.interrumpir(); // el proceso pasa de ejecucion a listo
                         colaDeProcesos.add(proceso);
                     }
-                    simulador.refrescarTablaColaProcesos();
+                    simulador.refrescarTablaColaProcesosListos();
                 }
             }
         }

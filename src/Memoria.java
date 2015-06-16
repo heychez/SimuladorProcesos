@@ -28,8 +28,8 @@ public class Memoria {
     }
 
     public boolean cargarProceso(Proceso proceso) {
-        if (instance.memoriaEnUso + proceso.gettMemoria() <= MAX_MEMORIA_K) {
-            instance.memoriaEnUso += proceso.gettMemoria();
+        if (instance.memoriaEnUso + proceso.getMemoria() <= MAX_MEMORIA_K) {
+            instance.memoriaEnUso += proceso.getMemoria();
             instance.procesosEnMemoria.add(proceso);
             return true;
         } else {
@@ -38,7 +38,7 @@ public class Memoria {
     }
 
     public void quitarProceso(Proceso proceso) {
-        instance.memoriaEnUso -= proceso.gettMemoria();
+        instance.memoriaEnUso -= proceso.getMemoria();
         instance.procesosEnMemoria.remove(proceso);
     }
 
