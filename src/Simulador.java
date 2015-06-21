@@ -31,7 +31,7 @@ public class Simulador extends javax.swing.JFrame {
 
     ProcesoComparator comparadorDeProcesos = new ProcesoComparator();
     ArrayList<Proceso> procesosNuevos = new ArrayList();
-    PriorityQueue<Proceso> colaDeProcesos = new PriorityQueue(1, comparadorDeProcesos);
+    PriorityQueue<Proceso> colaDeProcesosListos = new PriorityQueue(1, comparadorDeProcesos);
     ArrayList<Proceso> procesosBloqueados = new ArrayList();
     ArrayList<Proceso> procesosFinalizados = new ArrayList();
     long unidadDeTiempoMs = 1000;
@@ -39,6 +39,7 @@ public class Simulador extends javax.swing.JFrame {
     Memoria memoria = Memoria.getInstance();
     Admision rutinaAdmision = new Admision(this);
     Despachador rutinaDespachador = new Despachador(this);
+    Bloqueador rutinaBloqueador = new Bloqueador(this);
 
     /**
      * Creates new form Simulador
@@ -147,7 +148,7 @@ public class Simulador extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Prioridad", "Nombre", "tEjecucion", "tFaltante", "Estado"
+                "Nombre", "Prioridad", "tEjecucion", "tFaltante", "Estado"
             }
         ) {
             Class[] types = new Class [] {
@@ -288,7 +289,7 @@ public class Simulador extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Prioridad", "Nombre", "tEjecucion", "tFaltante", "Estado"
+                "Nombre", "Prioridad", "tEjecucion", "tFaltante", "Estado"
             }
         ) {
             Class[] types = new Class [] {
@@ -463,48 +464,28 @@ public class Simulador extends javax.swing.JFrame {
 
         if (rutinaAdmision.isAlive() || rutinaDespachador.isAlive()) {
             rutinaAdmision = new Admision(this);
-            rutinaDespachador = new Despachador(this);
-
             rutinaAdmision.start();
+            rutinaDespachador = new Despachador(this);
             rutinaDespachador.start();
+            rutinaBloqueador = new Bloqueador(this);
+            rutinaBloqueador.start();
         } else {
             rutinaAdmision.start();
             rutinaDespachador.start();
+            rutinaBloqueador.start();
         }
     }//GEN-LAST:event_botonIniciarActionPerformed
 
     private void botonIoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonIoActionPerformed
-        Iterator<Proceso> it = colaDeProcesos.iterator();
+        Iterator<Proceso> it = colaDeProcesosListos.iterator();
         while (it.hasNext()) {
             Proceso p = it.next();
             if (p.getEstado() == Proceso.ESTADO_EJECUCION) {
                 synchronized (this) {
                     p.bloqueado();
-
-                    procesosBloqueados.add(p.copia());
-                    int idx = procesosBloqueados.size() - 1;
+                    procesosBloqueados.add(p);
+                    refrescarTablaProcesoEjecucion(null, 0);
                     refrescarTablaProcesosBloqueados();
-
-                    
-                    /*long t = System.currentTimeMillis();
-                    long end = t + p.gettBloqueado() * getUnidadDeTiempoMs();
-                    while (System.currentTimeMillis() < end) {
-
-                    }try {
-                     TimeUnit.MILLISECONDS.sleep(p.gettBloqueado() * getUnidadDeTiempoMs());
-                     } catch (InterruptedException ex) {
-                     Logger.getLogger(Simulador.class.getName()).log(Level.SEVERE, null, ex);
-                     }
-                     try {
-                     Thread.sleep(p.gettBloqueado() * getUnidadDeTiempoMs());
-                     } catch (InterruptedException ex) {
-                     Thread.currentThread().interrupt();
-                     }*/
-
-                    p.desbloqueado();
-
-                    //procesosBloqueados.remove(idx);
-                    //refrescarTablaProcesosBloqueados();
                 }
                 break;
             }
@@ -515,7 +496,7 @@ public class Simulador extends javax.swing.JFrame {
         DefaultTableModel dtm = (DefaultTableModel) tablaProcesosNuevos.getModel();
         dtm.setRowCount(0);
 
-        ArrayList<Proceso> temp = new ArrayList(procesosBloqueados);
+        ArrayList<Proceso> temp = new ArrayList(procesosNuevos);
 
         for (int i = 0; i < temp.size(); i++) {
             Proceso p = temp.get(i);
@@ -538,19 +519,19 @@ public class Simulador extends javax.swing.JFrame {
         DefaultTableModel dtm = (DefaultTableModel) tablaColaProcesosListos.getModel();
         dtm.setRowCount(0);
 
-        PriorityQueue<Proceso> temp = new PriorityQueue(colaDeProcesos);
+        PriorityQueue<Proceso> temp = new PriorityQueue(colaDeProcesosListos);
 
         while (!temp.isEmpty()) {
             Proceso p = temp.poll();
-            //if (p.getEstado() == Proceso.ESTADO_LISTO) {
-            Vector v = new Vector();
-            v.add(p.getPrioridad());
-            v.add(p.getNombre());
-            v.add(p.gettEjecucion());
-            v.add(p.gettFaltante());
-            v.add(p.getNombreEstado());
-            dtm.addRow(v);
-            //}
+            if (p.getEstado() == Proceso.ESTADO_LISTO) {
+                Vector v = new Vector();
+                v.add(p.getNombre());
+                v.add(p.getPrioridad());
+                v.add(p.gettEjecucion());
+                v.add(p.gettFaltante());
+                v.add(p.getNombreEstado());
+                dtm.addRow(v);
+            }
         }
     }
 
@@ -560,8 +541,8 @@ public class Simulador extends javax.swing.JFrame {
 
         if (p != null) {
             Vector v = new Vector();
-            v.add(p.getPrioridad());
             v.add(p.getNombre());
+            v.add(p.getPrioridad());
             v.add(p.gettEjecucion());
             String tf = p.gettFaltante() + " (" + (p.gettFaltante() + q) + "-" + q + ")";
             v.add(tf);
@@ -578,13 +559,14 @@ public class Simulador extends javax.swing.JFrame {
 
         for (int i = 0; i < temp.size(); i++) {
             Proceso p = temp.get(i);
-            Vector v = new Vector();
-
-            v.add(p.getPrioridad());
-            v.add(p.getNombre());
-            v.add(p.gettBloqueado());
-            v.add(p.getNombreEstado());
-            dtm.addRow(v);
+            if (p.getEstado() == Proceso.ESTADO_BLOQUEADO) {
+                Vector v = new Vector();
+                v.add(p.getPrioridad());
+                v.add(p.getNombre());
+                v.add(p.gettBloqueado());
+                v.add(p.getNombreEstado());
+                dtm.addRow(v);
+            }
         }
     }
 
@@ -614,7 +596,11 @@ public class Simulador extends javax.swing.JFrame {
     }
 
     public PriorityQueue<Proceso> getColaDeProcesos() {
-        return colaDeProcesos;
+        return colaDeProcesosListos;
+    }
+
+    public ArrayList<Proceso> getProcesosBloqueados() {
+        return procesosBloqueados;
     }
 
     public ArrayList<Proceso> getProcesosFinalizados() {

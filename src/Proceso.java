@@ -14,8 +14,8 @@ public class Proceso {
 
     public static final int MIN_PRIORIDAD = 1;
     public static final int MAX_PRIORIDAD = 10;
-    public static final int MIN_MEMORIA = 50;//100;
-    public static final int MAX_MEMORIA = 100;//600;
+    public static final int MIN_MEMORIA = 100;//50;//100;
+    public static final int MAX_MEMORIA = 600;//100;//600;
     public static final int MIN_T_EJECUCION = 3;
     public static final int MAX_T_EJECUCION = 15;
     public static final int MIN_T_BLOQUEADO = 1;

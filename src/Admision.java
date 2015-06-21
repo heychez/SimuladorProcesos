@@ -49,7 +49,7 @@ public class Admision extends Thread {
             }
             
             try {
-                this.sleep(50);
+                this.sleep(6000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Admision.class.getName()).log(Level.SEVERE, null, ex);
             }
