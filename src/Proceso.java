@@ -15,11 +15,11 @@ public class Proceso {
     public static final int MIN_PRIORIDAD = 1;
     public static final int MAX_PRIORIDAD = 10;
     public static final int MIN_MEMORIA = 100;//50;//100;
-    public static final int MAX_MEMORIA = 600;//100;//600;
+    public static final int MAX_MEMORIA = 300;//600;//100;//600;
     public static final int MIN_T_EJECUCION = 3;
     public static final int MAX_T_EJECUCION = 15;
-    public static final int MIN_T_BLOQUEADO = 1;
-    public static final int MAX_T_BLOQUEADO = 3;
+    public static final int MIN_T_BLOQUEADO = 1;//1;
+    public static final int MAX_T_BLOQUEADO = 3;//3;
     public static final int ESTADO_NUEVO = 0;
     public static final int ESTADO_LISTO = 1;
     public static final int ESTADO_EJECUCION = 2;
@@ -37,7 +37,7 @@ public class Proceso {
     private int tFaltante;
     private int tBloqueado;
     private int quantumUtilizado;
-    
+
     public boolean enMemoria = false;
 
     public Proceso() {
@@ -45,7 +45,7 @@ public class Proceso {
     }
 
     public Proceso(String nombre) {
-        this.nombre = Planificador.nuevoProceso(nombre);
+        this.nombre = Configuracion.nuevoProceso(nombre);
         this.prioridad = new Random().nextInt((MAX_PRIORIDAD - MIN_PRIORIDAD) + 1) + MIN_PRIORIDAD;
         this.memoria = new Random().nextInt((MAX_MEMORIA - MIN_MEMORIA) + 1) + MIN_MEMORIA;
         this.tEjecucion = new Random().nextInt((MAX_T_EJECUCION - MIN_T_EJECUCION) + 1) + MIN_T_EJECUCION;
@@ -77,30 +77,34 @@ public class Proceso {
         return new Proceso(nombre, prioridad, memoria, tEjecucion, estado, tFaltante, quantumUtilizado);
     }
 
-    public void listo() {
+    public synchronized void listo() {
         estado = ESTADO_LISTO;
     }
+    
+    public synchronized void suspenderListo() {
+        estado = ESTADO_LISTO_SUSPENDIDO;
+    }
 
-    public void ejecutar(int quantum) {
+    public synchronized void ejecutar(int quantum) {
         estado = ESTADO_EJECUCION;
         tFaltante -= quantum;
         quantumUtilizado = quantum;
     }
-    
-    public void bloqueado(){
+
+    public synchronized void bloqueado() {
         estado = ESTADO_BLOQUEADO;
         tBloqueado = new Random().nextInt((MAX_T_BLOQUEADO - MIN_T_BLOQUEADO) + 1) + MIN_T_BLOQUEADO;
     }
-    
-    public void desbloqueado(){
+
+    public synchronized void desbloqueado() {
         estado = ESTADO_LISTO;
     }
 
-    public void interrumpir() {
+    public synchronized void interrumpir() {
         estado = ESTADO_LISTO;
     }
 
-    public void finalizar() {
+    public synchronized void finalizar() {
         estado = ESTADO_FINALIZADO;
     }
 
@@ -147,8 +151,8 @@ public class Proceso {
     public int gettFaltante() {
         return tFaltante;
     }
-    
-    public int gettBloqueado(){
+
+    public int gettBloqueado() {
         return tBloqueado;
     }
 
@@ -156,7 +160,7 @@ public class Proceso {
         return quantumUtilizado;
     }
 
-    public void setEstado(int estado) {
+    public synchronized void setEstado(int estado) {
         this.estado = estado;
     }
 

@@ -8,10 +8,10 @@
  *
  * @author Roberto
  */
-public class Planificador {
+public class Configuracion {
 
     public static final int QUANTUM = 5;//2;
-
+    public static int timer = -1;
     private static int nroDeProcesos = 0;
 
     public void reset() {
